@@ -157,7 +157,7 @@ OpenShift Pipelines is provided as an add-on on top of OpenShift that can be ins
 Create a project for the sample application that you will be using in this tutorial:
 
 ```bash
-$ oc new-project pipelines-tutorial
+oc new-project pipelines-tutorial
 ```
 
 OpenShift Pipelines automatically adds and configures a `ServiceAccount` named `pipeline` that has sufficient permissions to build and push an image. This
@@ -166,7 +166,7 @@ service account will be used later in the tutorial.
 Run the following command to see the `pipeline` service account:
 
 ```bash
-$ oc get serviceaccount pipeline
+oc get serviceaccount pipeline
 ```
 
 You can also deploy the same applications by applying the artifacts available in k8s directory of the respective repo
@@ -221,15 +221,14 @@ Note that only the requirement for a git repository is declared on the task and 
 Install the `apply-manifests` and `update-deployment` tasks from the repository using `oc` or `kubectl`, which you will need for creating a pipeline in the next section:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/update_deployment_task.yaml
-$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/apply_manifest_task.yaml
-
+oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/update_deployment_task.yaml
+oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/apply_manifest_task.yaml
 ```
 
 You can take a look at the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
 
-```
-$ tkn task ls
+```bash
+tkn task ls
 
 NAME                AGE
 apply-manifests     10 seconds ago
@@ -238,8 +237,10 @@ update-deployment   4 seconds ago
 
 We will be using the `buildah` ClusterTask which gets installed along with the Operator. Operator installs few ClusterTask which you can see.
 
+```bash
+tkn clustertask ls
 ```
-$ tkn clustertask ls
+```bash
 NAME                      AGE
 buildah                   2 minutes ago
 buildah-v0-8-0            2 minutes ago
@@ -332,7 +333,7 @@ The execution order of task is determined by dependencies that are defined betwe
 Create the pipeline by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/pipeline.yaml
+oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/pipeline.yaml
 ```
 
 Alternatively, in the OpenShift web console, you can click on the **+** at the top right of the screen while you are in the **pipelines-tutorial** project:
@@ -348,9 +349,10 @@ Upon creating the pipeline via the web console, you will be taken to a **Pipelin
 
 Check the list of pipelines you have created using the CLI:
 
+```bash
+tkn pipeline ls
 ```
-$ tkn pipeline ls
-
+```bash
 NAME               AGE            LAST RUN   STARTED   DURATION   STATUS
 build-and-deploy   1 minute ago   ---        ---       ---        ---
 ```
@@ -393,7 +395,7 @@ spec:
 Create the above pipeline resources via the OpenShift web console or by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/csantanapr/pipelines-tutorial/master/pipeline/resources.yaml
+oc create -f https://raw.githubusercontent.com/csantanapr/pipelines-tutorial/master/pipeline/resources.yaml
 ```
 
 > **Note** :-
@@ -406,8 +408,9 @@ frontend and backend image resource to the correct url with your namespace name 
 You can see the list of resources created using `tkn`:
 
 ```bash
-$ tkn resource ls
-
+tkn resource ls
+```
+```bash
 NAME        TYPE    DETAILS
 ui-repo     git     url: http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git
 ui-image    image   url: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest
@@ -416,7 +419,7 @@ ui-image    image   url: image-registry.openshift-image-registry.svc:5000/pipeli
 A `PipelineRun` is how you can start a pipeline and tie it to the git and image resources that should be used for this specific invocation. You can start the pipeline using `tkn`:
 
 ```bash
-$ tkn pipeline start build-and-deploy
+tkn pipeline start build-and-deploy
 ? Choose the git resource to use for ui-repo: ui-repo (http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git)
 ? Choose the image resource to use for ui-image: ui-image (image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest)
 Pipelinerun started: build-and-deploy-run-z2rz8
@@ -429,7 +432,9 @@ And it will start streaming the logs of the pipeline we just trigered.
 As soon as you start the `build-and-deploy` pipeline, a pipelinerun will be instantiated and pods will be created to execute the tasks that are defined in the pipeline.
 
 ```bash
-$ tkn pipeline list
+tkn pipeline list
+```
+```bash
 NAME               AGE             LAST RUN                     STARTED          DURATION   STATUS
 build-and-deploy   6 minutes ago   build-and-deploy-run-z2rz8   36 seconds ago   ---        Running
 
@@ -437,16 +442,19 @@ build-and-deploy   6 minutes ago   build-and-deploy-run-z2rz8   36 seconds ago  
 
 Check out the logs of the pipelinerun as it runs using the `tkn pipeline logs` command which interactively allows you to pick the pipelinerun of your interest and inspect the logs:
 
+```bash
+tkn pipeline logs -f
 ```
-$ tkn pipeline logs -f
+```bash
 ? Select pipeline : build-and-deploy
 ```
 
 After a few minutes, the pipeline should finish successfully.
 
 ```bash
-$ tkn pipeline list
-
+tkn pipeline list
+```
+```bash
 NAME               AGE              LAST RUN                     STARTED         DURATION    STATUS
 build-and-deploy   11 minutes ago   build-and-deploy-run-z2rz8   5 minutes ago   5 minutes   Succeeded
 ```
@@ -464,6 +472,6 @@ You can get the route of the application by executing the following command and 
 
 If you want to re-run the pipeline again, you can use the following short-hand command to rerun the last pipelinerun again that uses the same pipeline resources and service account used in the previous pipeline run:
 
-```
+```bash
 tkn pipeline start build-and-deploy --last
 ```
