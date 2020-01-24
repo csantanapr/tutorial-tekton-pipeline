@@ -19,7 +19,10 @@ This tutorial walks you through pipeline concepts and how to create and run a si
 In this tutorial you will:
 * [Create Application](#create-app)
 * [Run Application](#run-app)
-* [Learn about Tekton concepts](#concepts)
+* [Build Container Image](#build-container-image)
+* [Run Container](#run-container)
+* [Run Application](#run-app)
+* [Learn about Tekton concepts](#pipeline-concepts)
 * [Install OpenShift Pipelines](#install-openshift-pipelines)
 * [Deploy a Sample Application](#deploy-sample-application)
 * [Install Tasks](#install-tasks)
@@ -37,7 +40,7 @@ You will also use the Tekton CLI (`tkn`) through out this tutorial. Download the
 ## Create Application
 
 You can use an existing Node.js application, or create a new one.
-For example using the express framework:
+For example using the [expressjs](https://expressjs.com/) framework:
 ```bash
 npx express-generator --view=pug src
 ```
@@ -58,11 +61,16 @@ Run the app:
 DEBUG=src:* npm start
 ```
 
+You can access the application on `locahost:3000` with `curl` or your browser
+```
+open http://localhost:3000
+```
+
 ## Run Application in a Container
 
 To run the application in container you need to package the application into a container image and then run the container.
 
-### Build the Container
+### Build Container Image
 
 You will need a Dockefile to be able to package you application into a container image.
 
@@ -81,12 +89,32 @@ CMD [ "npm", "start" ]
 
 To be able to build the container image you will need a tool such as Docker Desktop that includes the docker CLI.
 
-Run the following command
+Change directory to the root directory where the `Dockerfile` is located
+```bash
+cd ..
+ls Dockerfile
+```
 
+Run the following command to build the container image with tag `app:latest`
+```bash
+docker build . -t app
+```
 
-### Run the Container
+### Run Container
 
-## Concepts
+Run the container exposing the port 3000 from the application into your host, this will allow you to access the application in the same way it will run when deployed into OpenShift
+```bash
+docker run -p 3000:3000 app
+```
+
+You can access the application on `locahost:3000` with `curl` or your browser
+```
+open http://localhost:3000
+```
+
+Note: The command `docker run` can also be use to set environment variables or mount a directory inside the container.
+
+## Pipeline Concepts
 
 Tekton defines a number of [Kubernetes custom resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) as building blocks in order to standardize pipeline concepts and provide a terminology that is consistent across CI/CD solutions. These custom resources are an extension of the Kubernetes API that let users create and interact with these objects using `kubectl` and other Kubernetes tools.
 
@@ -110,6 +138,16 @@ In the following sections, you will go through each of the above steps to define
 
 ## Install OpenShift Pipelines
 
+If using CRC, then start using the command:
+```bash
+crc start
+```
+
+To access the OpenShift Console on CRC use the command
+```bash
+crc console
+```
+
 OpenShift Pipelines is provided as an add-on on top of OpenShift that can be installed via an operator available in the OpenShift OperatorHub. Follow [these instructions](install-operator.md) in order to install OpenShift Pipelines on OpenShift via the OperatorHub.
 
 ![OpenShift OperatorHub](images/operatorhub.png)
@@ -131,8 +169,6 @@ Run the following command to see the `pipeline` service account:
 $ oc get serviceaccount pipeline
 ```
 
-You will use the simple application during this tutorial, which has a [frontend](https://github.com/openshift-pipelines/vote-ui) and [backend](https://github.com/openshift-pipelines/vote-api)
-
 You can also deploy the same applications by applying the artifacts available in k8s directory of the respective repo
 
 If you deploy the application directly, you should be able to see the deployment in the OpenShift Web Console by switching over to the **Developer** perspective of the OpenShift web console. Change from **Administrator** to **Developer** from the drop down as shown below:
@@ -143,10 +179,13 @@ Make sure you are on the `pipelines-tutorial` project by selecting it from the *
 
 ![Projects](images/projects.png)
 
+
 <!--
+
 On the **Topology** view of the **Developer** perspective, you will be able to see the resources you just created.
 
 ![Projects](images/application-deployed.png)
+
 -->
 
 ## Install Tasks
@@ -182,8 +221,8 @@ Note that only the requirement for a git repository is declared on the task and 
 Install the `apply-manifests` and `update-deployment` tasks from the repository using `oc` or `kubectl`, which you will need for creating a pipeline in the next section:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/pipeline/update_deployment_task.yaml
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/pipeline/apply_manifest_task.yaml
+$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/update_deployment_task.yaml
+$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/apply_manifest_task.yaml
 
 ```
 
@@ -197,7 +236,7 @@ apply-manifests     10 seconds ago
 update-deployment   4 seconds ago
 ```
 
-We will be using `buildah` and`s2i-python-3` tasks also which gets installed along with Operator. Operator installs few ClusterTask which you can see.
+We will be using the `buildah` ClusterTask which gets installed along with the Operator. Operator installs few ClusterTask which you can see.
 
 ```
 $ tkn clustertask ls
@@ -209,23 +248,6 @@ openshift-client          2 minutes ago
 openshift-client-v0-8-0   2 minutes ago
 openshift-client-v0-9-0   2 minutes ago
 s2i                       2 minutes ago
-s2i-go                    2 minutes ago
-s2i-go-v0-8-0             2 minutes ago
-s2i-go-v0-9-0             2 minutes ago
-s2i-java-11               2 minutes ago
-s2i-java-11-v0-8-0        2 minutes ago
-s2i-java-11-v0-9-0        2 minutes ago
-s2i-java-8                2 minutes ago
-s2i-java-8-v0-8-0         2 minutes ago
-s2i-java-8-v0-9-0         2 minutes ago
-s2i-nodejs                2 minutes ago
-s2i-nodejs-v0-8-0         2 minutes ago
-s2i-nodejs-v0-9-0         2 minutes ago
-s2i-python-3              2 minutes ago
-s2i-python-3-v0-8-0       2 minutes ago
-s2i-python-3-v0-9-0       2 minutes ago
-s2i-v0-8-0                2 minutes ago
-s2i-v0-9-0                2 minutes ago
 ```
 
 ## Create Pipeline
@@ -245,57 +267,15 @@ metadata:
   name: build-and-deploy
 spec:
   resources:
-    - name: api-repo
-      type: git
-    - name: api-image
-      type: image
     - name: ui-repo
       type: git
     - name: ui-image
       type: image
 
   tasks:
-    - name: build-api
-      taskRef:
-        name: buildah
-        kind: ClusterTask
-      resources:
-        inputs:
-          - name: source
-            resource: api-repo
-        outputs:
-          - name: image
-            resource: api-image
-      params:
-        - name: TLSVERIFY
-          value: "false"
-
-    - name: apply-api-manifests
-      taskRef:
-        name: apply-manifests
-      resources:
-        inputs:
-          - name: source
-            resource: api-repo
-      runAfter:
-        - build-api
-
-    - name: update-api-image
-      taskRef:
-        name: update-deployment
-      resources:
-        inputs:
-          - name: image
-            resource: api-image
-      params:
-        - name: deployment
-          value: "api"
-      runAfter:
-        - apply-api-manifests
-
     - name: build-ui
       taskRef:
-        name: s2i-python-3
+        name: buildah
         kind: ClusterTask
       resources:
         inputs:
@@ -317,7 +297,6 @@ spec:
             resource: ui-repo
       runAfter:
         - build-ui
-        - update-api-image
 
     - name: update-ui-image
       taskRef:
@@ -334,14 +313,9 @@ spec:
 ```
 
 This pipeline performs the following:
-1. Clones the source code of the frontend application from a git repository (`api-repo`
-   resource) and the backend application from a git repository (`ui-repo`resource)
-2. Builds the container image of frontend using the `s2i-python-3` task that generates a
-   Dockerfile for the application using [Source-to-Image (S2I)](https://docs.openshift.com/container-platform/4.1/builds/understanding-image-builds.html#build-strategy-s2i_understanding-image-builds).
-   and uses [Buildah](https://buildah.io/) to build the image
-3. Builds the container image of backend using the `buildah` task
-   that uses [Buildah](https://buildah.io/) to build the image
-4. The application image is pushed to an image registry (`api-image` and `ui-image` resource)
+1. Clones the source code of the frontend application from a git repository (`ui-repo` resource)
+2. Builds the container image using the `buildah` task that uses [Buildah](https://buildah.io/) to build the image
+4. The application image is pushed to an image registry (`ui-image` resource)
 5. The new application image is deployed on OpenShift using the `apply-manifests` and `update-deployment` tasks.
 
 You might have noticed that there are no references to the git
@@ -358,7 +332,7 @@ The execution order of task is determined by dependencies that are defined betwe
 Create the pipeline by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/pipeline/pipeline.yaml
+$ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/pipeline.yaml
 ```
 
 Alternatively, in the OpenShift web console, you can click on the **+** at the top right of the screen while you are in the **pipelines-tutorial** project:
@@ -399,7 +373,7 @@ spec:
   type: git
   params:
     - name: url
-      value: http://github.com/openshift-pipelines/vote-ui.git
+      value: http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git
 ```
 
 And the following defines the OpenShift internal image registry for the frontend image to be pushed to:
@@ -416,38 +390,10 @@ spec:
       value: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest
 ```
 
-And the following `PipelineResource` defines the git repository for the backend application:
-
-```yaml
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: api-repo
-spec:
-  type: git
-  params:
-    - name: url
-      value: http://github.com/openshift-pipelines/vote-api.git
-```
-
-And the following defines the OpenShift internal image registry for the backend image to be pushed to:
-
-```yaml
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: api-image
-spec:
-  type: image
-  params:
-    - name: url
-      value: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/api:latest
-```
-
 Create the above pipeline resources via the OpenShift web console or by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/pipeline/resources.yaml
+$ oc create -f https://raw.githubusercontent.com/csantanapr/pipelines-tutorial/master/pipeline/resources.yaml
 ```
 
 > **Note** :-
@@ -463,9 +409,7 @@ You can see the list of resources created using `tkn`:
 $ tkn resource ls
 
 NAME        TYPE    DETAILS
-api-repo    git     url: http://github.com/openshift-pipelines/vote-api.git
-ui-repo     git     url: http://github.com/openshift-pipelines/vote-ui.git
-api-image   image   url: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/api:latest
+ui-repo     git     url: http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git
 ui-image    image   url: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest
 ```
 
@@ -473,9 +417,7 @@ A `PipelineRun` is how you can start a pipeline and tie it to the git and image 
 
 ```bash
 $ tkn pipeline start build-and-deploy
-? Choose the git resource to use for api-repo: api-repo (http://github.com/openshift-pipelines/vote-api.git)
-? Choose the image resource to use for api-image: api-image (image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/api:latest)
-? Choose the git resource to use for ui-repo: ui-repo (http://github.com/openshift-pipelines/vote-ui.git)
+? Choose the git resource to use for ui-repo: ui-repo (http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git)
 ? Choose the image resource to use for ui-image: ui-image (image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest)
 Pipelinerun started: build-and-deploy-run-z2rz8
 Showing logs...

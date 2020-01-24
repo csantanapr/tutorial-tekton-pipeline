@@ -87,8 +87,6 @@ demo.logs() {
 
 demo.run() {
   TKN pipeline start build-and-deploy \
-    -r api-repo=api-repo \
-    -r api-image=api-image \
     -r ui-repo=ui-repo \
     -r ui-image=ui-image
 }
