@@ -393,7 +393,7 @@ spec:
 Create the above pipeline resources via the OpenShift web console or by running the following:
 
 ```bash
-oc create -f https://raw.githubusercontent.com/csantanapr/pipelines-tutorial/master/pipeline/resources.yaml
+oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/resources.yaml
 ```
 
 > **Note** :-
