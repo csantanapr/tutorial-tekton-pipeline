@@ -338,12 +338,6 @@ Alternatively, in the OpenShift web console, you can click on the **+** at the t
 
 ![OpenShift Console - Import Yaml](images/console-import-yaml.png)
 
-Upon creating the pipeline via the web console, you will be taken to a **Pipeline Details** page that gives an overview of the pipeline you created.
-<!-- >
-
-![OpenShift Console - Pipeline Details](images/pipeline-details.png)
-
--->
 
 Check the list of pipelines you have created using the CLI:
 
@@ -409,16 +403,16 @@ You can see the list of resources created using `tkn`:
 tkn resource ls
 ```
 ```bash
-NAME        TYPE    DETAILS
-ui-repo     git     url: http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git
-ui-image    image   url: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest
+NAME       TYPE    DETAILS
+ui-repo    git     url: https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial
+ui-image   image   url: image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest
 ```
 
 A `PipelineRun` is how you can start a pipeline and tie it to the git and image resources that should be used for this specific invocation. You can start the pipeline using `tkn`:
 
 ```bash
 tkn pipeline start build-and-deploy
-? Choose the git resource to use for ui-repo: ui-repo (http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git)
+? Choose the git resource to use for ui-repo: ui-repo (https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial)
 ? Choose the image resource to use for ui-image: ui-image (image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest)
 Pipelinerun started: build-and-deploy-run-z2rz8
 Showing logs...
@@ -457,14 +451,22 @@ NAME               AGE              LAST RUN                     STARTED        
 build-and-deploy   11 minutes ago   build-and-deploy-run-z2rz8   5 minutes ago   5 minutes   Succeeded
 ```
 
-Looking back at the project, you should see that the images are successfully built and deployed.
+
+You can go to **Developer-Pipeline** and see the resulting PipelineRun:
+
+
+![OpenShift Console - PipelineRun Details](images/pipeline-details.png)
+
+
+
+Go to the Topology view, you should see that the images are successfully built and deployed.
 
 ![Application Deployed](images/application-deployed.png)
 
 You can get the route of the application by executing the following command and access the application
 
 ```bash
-  oc get route ui --template='http://{{.spec.host}}'
+oc get route ui --template='http://{{.spec.host}}'
 ```
 
 
