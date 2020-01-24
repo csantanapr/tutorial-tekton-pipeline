@@ -146,14 +146,24 @@ In the following sections, you will go through each of the above steps to define
 
 ## Install OpenShift Pipelines
 
-If using CRC, then start using the command:
+If using CRC, you need to run setup once:
 ```bash
-crc start
+crc setup
+```
+
+Then start using the `crc start` you can pass the pull secret file as a parameter the first time you run the command.
+```bash
+crc start -p ~/Downloads/pull-secret.txt
 ```
 
 To access the OpenShift Console on CRC use the command
 ```bash
 crc console
+```
+
+When you are done using CRC you can stop it to reclaim workstation resources
+```bash
+crc stop
 ```
 
 OpenShift Pipelines is provided as an add-on on top of OpenShift that can be installed via an operator available in the OpenShift OperatorHub. Follow [these instructions](install-operator.md) in order to install OpenShift Pipelines on OpenShift via the OperatorHub.
