@@ -242,13 +242,11 @@ tkn clustertask ls
 ```
 ```bash
 NAME                      AGE
-buildah                   2 minutes ago
-buildah-v0-8-0            2 minutes ago
-buildah-v0-9-0            2 minutes ago
-openshift-client          2 minutes ago
-openshift-client-v0-8-0   2 minutes ago
-openshift-client-v0-9-0   2 minutes ago
-s2i                       2 minutes ago
+buildah                   24 minutes ago
+buildah-v0-8-0            24 minutes ago
+openshift-client          24 minutes ago
+openshift-client-v0-8-0   24 minutes ago
+s2i                       24 minutes ago
 ```
 
 ## Create Pipeline
@@ -375,7 +373,7 @@ spec:
   type: git
   params:
     - name: url
-      value: http://github.com/csantanapr/openshift-pipeline-nodejs-tutorial.git
+      value: https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial
 ```
 
 And the following defines the OpenShift internal image registry for the frontend image to be pushed to:
