@@ -1,5 +1,13 @@
 # OpenShift Pipelines Node.js Tutorial
 
+You can use this repository as a template to create your own github repository.
+
+![Github Template](images/github-use-template.png)
+
+Take into account you will need to adjust the tutorial files to point to your new github repository url,
+you can replace the git url in the file [pipeline/resources.yaml](pipeline/resources.yaml).
+Also if you want to deploy to a different namespace than `pipelines-tutorial` on OpenShift, you need to adjust the image url to use a different namespace, replace `pipelines-tutorial` in image url in the file [pipeline/resources.yaml](pipeline/resources.yaml).
+
 Welcome to the OpenShift Pipelines tutorial!
 
 OpenShift Pipelines is a cloud-native, continuous integration and delivery (CI/CD) solution for building pipelines using [Tekton](https://tekton.dev). Tekton is a flexible, Kubernetes-native, open-source CI/CD framework that enables automating deployments across multiple platforms (Kubernetes, serverless, VMs, etc) by abstracting away the underlying details.
@@ -169,9 +177,7 @@ Run the following command to see the `pipeline` service account:
 oc get serviceaccount pipeline
 ```
 
-You can also deploy the same applications by applying the artifacts available in k8s directory of the respective repo
-
-If you deploy the application directly, you should be able to see the deployment in the OpenShift Web Console by switching over to the **Developer** perspective of the OpenShift web console. Change from **Administrator** to **Developer** from the drop down as shown below:
+Open the OpenShift Web Console by switching over to the **Developer** perspective of the OpenShift web console. Change from **Administrator** to **Developer** from the drop down as shown below:
 
 ![Developer Perspective](images/developer.png)
 
@@ -179,14 +185,6 @@ Make sure you are on the `pipelines-tutorial` project by selecting it from the *
 
 ![Projects](images/projects.png)
 
-
-<!--
-
-On the **Topology** view of the **Developer** perspective, you will be able to see the resources you just created.
-
-![Projects](images/application-deployed.png)
-
--->
 
 ## Install Tasks
 
@@ -224,6 +222,8 @@ Install the `apply-manifests` and `update-deployment` tasks from the repository 
 oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/update_deployment_task.yaml
 oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/apply_manifest_task.yaml
 ```
+
+This tasks use the directory [k8s/](./k8s) as default location for the Kubernetes YAML manifests to configure the Kubernetes resources such as `Deployment`, `Service`, and `Route`
 
 You can take a look at the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
 
