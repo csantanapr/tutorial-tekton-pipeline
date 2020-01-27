@@ -1,9 +1,13 @@
 FROM registry.access.redhat.com/ubi8/nodejs-12
 
-COPY src src
+RUN mkdir app
 
-WORKDIR src
-
-RUN npm install --production
+WORKDIR app
 
 CMD [ "npm", "start" ]
+
+COPY src/package*.json ./
+
+RUN npm ci
+
+COPY src .
