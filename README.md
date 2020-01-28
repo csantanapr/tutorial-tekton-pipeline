@@ -105,6 +105,8 @@ COPY src .
 ```
 
 Having the last line as `COPY src .` allows for faster builds, skiping the installation of the dependencies.
+Having a change for dependencies such as updating the files `src/package.*.json`, this will trigger a new layer be created using `RUN npm ci`. Using `NODE_ENV=prodction` allows the `npm ci` to skip dev dependencies and for any Node.js library that leverages the environment variable to run in production mode.
+
 
 To be able to build the container image you will need a tool such as Docker Desktop that includes the docker CLI.
 
