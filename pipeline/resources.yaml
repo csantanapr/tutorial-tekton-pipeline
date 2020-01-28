@@ -8,6 +8,8 @@ spec:
   params:
     - name: url
       value: https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial
+    - name: revision
+      value: master
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource

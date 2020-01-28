@@ -47,30 +47,33 @@ You will also use the Tekton CLI (`tkn`) through out this tutorial. Download the
 
 ## Create Application
 
-You can use an existing Node.js application, or create a new one.
-For example using the [expressjs](https://expressjs.com/) framework:
+You can use an existing Node.js application and copy the source code to the `src` directory, or create a new one.
+
+The `src` directory on this repository already contains an application that was created using the [expressjs](https://expressjs.com/) framework:
 ```bash
 npx express-generator --view=pug src
-```
-Change directory:
-```bash
-cd src
 ```
 
 ## Run Application
 If you have Node.js install you can go ahead and run the application
 
-Install dependencies:
+Change directory:
+```bash
+cd src
 ```
+
+Install dependencies:
+```bash
 npm install
 ```
+
 Run the app:
-```
+```bash
 DEBUG=src:* npm start
 ```
 
 You can access the application on `locahost:3000` with `curl` or your browser
-```
+```bash
 open http://localhost:3000
 ```
 
@@ -86,18 +89,28 @@ Here is a very simple example of a `Dockerfile` :
 ```Dockerfile
 FROM registry.access.redhat.com/ubi8/nodejs-12
 
-COPY src src
-
-WORKDIR src
-
-RUN npm install --production
-
 CMD [ "npm", "start" ]
+
+RUN mkdir app
+
+WORKDIR app
+
+ENV NODE_ENV=production
+
+COPY src/package*.json ./
+
+RUN npm ci
+
+COPY src .
 ```
+
+Having the last line as `COPY src .` allows for faster builds, skiping the installation of the dependencies.
+Having a change for dependencies such as updating the files `src/package.*.json`, this will trigger a new layer be created using `RUN npm ci`. Using `NODE_ENV=prodction` allows the `npm ci` to skip dev dependencies and for any Node.js library that leverages the environment variable to run in production mode.
+
 
 To be able to build the container image you will need a tool such as Docker Desktop that includes the docker CLI.
 
-Change directory to the root directory where the `Dockerfile` is located
+Change current directory to the root directory where the `Dockerfile` is located
 ```bash
 cd ..
 ls Dockerfile
@@ -105,7 +118,7 @@ ls Dockerfile
 
 Run the following command to build the container image with tag `app:latest`
 ```bash
-docker build . -t app
+docker build -t app .
 ```
 
 ### Run Container
@@ -166,9 +179,26 @@ When you are done using CRC you can stop it to reclaim workstation resources
 crc stop
 ```
 
-OpenShift Pipelines is provided as an add-on on top of OpenShift that can be installed via an operator available in the OpenShift OperatorHub. Follow [these instructions](install-operator.md) in order to install OpenShift Pipelines on OpenShift via the OperatorHub.
+OpenShift Pipelines is provided as an add-on on top of OpenShift that can be installed via an operator available in the OpenShift OperatorHub.
 
-![OpenShift OperatorHub](images/operatorhub.png)
+You can install the Operator from the CLI with the following command:
+```bash
+oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/subscription.yaml
+```
+
+You can verify Pipelines control plane is running in the namespace `openshift-pipelines`
+```bash
+oc get deployments -n openshift-pipelines
+```
+
+```bash
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+tekton-pipelines-controller   1/1     1            1           38s
+tekton-pipelines-webhook      1/1     1            1           37s
+```
+
+An alternative to the CLI installation you can use the OpenShift Console UI, follow [these instructions](install-operator.md) in order to install OpenShift Pipelines on OpenShift via the OperatorHub.
+
 
 ## Deploy Sample Application
 
@@ -239,7 +269,8 @@ You can take a look at the tasks you created using the [Tekton CLI](https://gith
 
 ```bash
 tkn task ls
-
+```
+```bash
 NAME                AGE
 apply-manifests     10 seconds ago
 update-deployment   4 seconds ago
@@ -378,6 +409,8 @@ spec:
   params:
     - name: url
       value: https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial
+    - name: revision
+      value: master
 ```
 
 And the following defines the OpenShift internal image registry for the frontend image to be pushed to:
@@ -422,6 +455,8 @@ A `PipelineRun` is how you can start a pipeline and tie it to the git and image 
 
 ```bash
 tkn pipeline start build-and-deploy
+```
+```bash
 ? Choose the git resource to use for ui-repo: ui-repo (https://github.com/csantanapr/openshift-pipeline-nodejs-tutorial)
 ? Choose the image resource to use for ui-image: ui-image (image-registry.openshift-image-registry.svc:5000/pipelines-tutorial/ui:latest)
 Pipelinerun started: build-and-deploy-run-z2rz8
