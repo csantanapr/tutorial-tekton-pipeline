@@ -295,7 +295,7 @@ apply-manifests     10 seconds ago
 update-deployment   4 seconds ago
 ```
 
-We will be using the `buildah` ClusterTask which gets installed along with the Operator. Operator installs few ClusterTask which you can see.
+We will be using the `buildah` ClusterTask which gets installed along with the Operator. Operator installs a few ClusterTasks which you can see.
 
 ```bash
 tkn clustertask ls
@@ -476,7 +476,7 @@ ui-image   image   url: image-registry.openshift-image-registry.svc:5000/pipelin
 A `PipelineRun` is how you can start a pipeline and tie it to the git and image resources that should be used for this specific invocation. You can start the pipeline using `tkn`:
 
 ```bash
-tkn pipeline start build-and-deploy
+tkn pipeline start build-and-deploy -s pipeline
 ```
 
 ```bash
@@ -487,9 +487,11 @@ Showing logs...
 
 ```
 
-And it will start streaming the logs of the pipeline we just trigered.
+Note: The `-s` flag in the command specifies the `ServiceAccount` to use for the `PipelineRun`, this is the `ServiceAccount` we saw earlier and contains secrets to push and pull to the internal image registry.
 
-As soon as you start the `build-and-deploy` pipeline, a pipelinerun will be instantiated and pods will be created to execute the tasks that are defined in the pipeline.
+And it will start streaming the logs of the pipeline we just triggered.
+
+As soon as you start the `build-and-deploy` pipeline, a `PipelineRun` will be instantiated and pods will be created to execute the tasks that are defined in the pipeline.
 
 ```bash
 tkn pipeline list
@@ -501,7 +503,7 @@ build-and-deploy   6 minutes ago   build-and-deploy-run-z2rz8   36 seconds ago  
 
 ```
 
-Check out the logs of the pipelinerun as it runs using the `tkn pipeline logs` command which interactively allows you to pick the pipelinerun of your interest and inspect the logs:
+Check out the logs of the `PipelineRun` as it runs using the `tkn pipeline logs` command which interactively allows you to pick the `PipelineRun` of your interest and inspect the logs:
 
 ```bash
 tkn pipeline logs -f
@@ -536,7 +538,7 @@ You can get the route of the application by executing the following command and 
 oc get route ui --template='http://{{.spec.host}}'
 ```
 
-If you want to re-run the pipeline again, you can use the following short-hand command to rerun the last pipelinerun again that uses the same pipeline resources and service account used in the previous pipeline run:
+If you want to re-run the pipeline again, you can use the following short-hand command to rerun the last `PipelineRun` again that uses the same pipeline resources and service account used in the previous pipeline run:
 
 ```bash
 tkn pipeline start build-and-deploy --last
