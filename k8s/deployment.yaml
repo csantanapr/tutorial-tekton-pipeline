@@ -16,7 +16,7 @@ spec:
                 app: ui
         spec:
             containers:
-                - image: docker.io/csantanapr/app-ui
+                - image: fake-registry/fake-repo/invalid-image
                   imagePullPolicy: Always
                   name: ui
                   ports:
