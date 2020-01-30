@@ -281,7 +281,8 @@ oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nod
 oc create -f https://raw.githubusercontent.com/csantanapr/openshift-pipeline-nodejs-tutorial/master/pipeline/apply_manifest_task.yaml
 ```
 
-This tasks use the directory [k8s/](./k8s) as default location for the Kubernetes YAML manifests to configure the Kubernetes resources such as `Deployment`, `Service`, and `Route`
+The `apply-manifests` task uses the directory [k8s/](./k8s) as default location for the Kubernetes YAML manifests to configure the Kubernetes resources. In this case we are building a `Deployment`, `Service`, and `Route`. We use an invalid placeholder image in [deployment.yaml](./k8s/deployment.yaml) so that Tekton does not deploy an application until the correct image is configured. The `update-deployment` task, when run after `apply-manifests`, will then patch the correct image into the deployment.
+
 
 You can take a look at the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
 
@@ -377,7 +378,8 @@ This pipeline performs the following:
 1. Clones the source code of the frontend application from a git repository (`ui-repo` resource)
 2. Builds the container image using the `buildah` task that uses [Buildah](https://buildah.io/) to build the image
 3. The application image is pushed to an image registry (`ui-image` resource)
-4. The new application image is deployed on OpenShift using the `apply-manifests` and `update-deployment` tasks.
+4. The `apply-manifests` task is run, thus creating a `Deployment`, `Service`, and `Route`
+5. The `update-ui-image` task patches the deployment to create pods with the `ui-image` resource, and the application is deployed
 
 You might have noticed that there are no references to the git
 repository or the image registry it will be pushed to. That's because pipeline in Tekton
